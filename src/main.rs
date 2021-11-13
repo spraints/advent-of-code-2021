@@ -16,7 +16,9 @@ fn main() {
     };
 }
 
-// mod day1;
+mod common;
+
+mod day1;
 // mod day10;
 // mod day11;
 // mod day12;
@@ -44,7 +46,7 @@ fn main() {
 
 fn run<R: Read>(day: u8, r: R) {
     match day {
-        // 1 => day1::run(r),
+        1 => day1::run(r),
         // 2 => day2::run(r),
         // 3 => day3::run(r),
         // 4 => day4::run(r),
