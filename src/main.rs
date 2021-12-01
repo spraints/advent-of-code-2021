@@ -102,16 +102,13 @@ fn time_all() {
 }
 
 fn time(day: u8) {
-    match open_input(day) {
-        Ok(f) => {
-            let start = Instant::now();
-            run(day, f);
-            println!(
-                "** day {}: {} ms",
-                day,
-                1000.0 * start.elapsed().as_secs_f32()
-            );
-        }
-        _ => (),
-    };
+    if let Ok(f) = open_input(day) {
+        let start = Instant::now();
+        run(day, f);
+        println!(
+            "** day {}: {} ms",
+            day,
+            1000.0 * start.elapsed().as_secs_f32()
+        );
+    }
 }

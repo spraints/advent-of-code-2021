@@ -7,7 +7,7 @@ pub fn run<R: Read>(r: R) {
     println!("part 2: {}", count(&nums, 4));
 }
 
-fn count(v: &Vec<u16>, sz: usize) -> usize {
+fn count(v: &[u16], sz: usize) -> usize {
     v.windows(sz)
         .filter(|nums| nums.last() > nums.first())
         .count()
