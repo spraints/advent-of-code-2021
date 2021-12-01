@@ -8,7 +8,7 @@ pub fn run<R: Read>(r: R) {
 }
 
 fn count(v: &[u16], sz: usize) -> usize {
-    v.windows(sz)
-        .filter(|nums| nums.last() > nums.first())
-        .count()
+    v.windows(sz).fold(0, |count, nums| {
+        count + if nums.last() > nums.first() { 1 } else { 0 }
+    })
 }
