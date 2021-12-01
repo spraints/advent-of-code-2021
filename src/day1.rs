@@ -7,8 +7,8 @@ pub fn run<R: Read>(r: R) {
     println!("part 2: {}", count(&nums, 4));
 }
 
-fn count(v: &[u16], sz: usize) -> usize {
+fn count(v: &Vec<u16>, sz: usize) -> usize {
     v.windows(sz)
-        .map(|nums| if nums.last() > nums.first() { 1 } else { 0 })
-        .sum()
+        .filter(|nums| nums.last() > nums.first())
+        .count()
 }
