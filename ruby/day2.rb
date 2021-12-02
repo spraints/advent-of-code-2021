@@ -17,4 +17,5 @@ def up(n)
 end
 
 eval script
-puts $depth * $dist
+puts "part 1: #{$aim * $dist}"
+puts "part 2: #{$depth * $dist}"

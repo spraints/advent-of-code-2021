@@ -29,7 +29,7 @@ mod day1;
 // mod day17;
 // mod day18;
 // mod day19;
-// mod day2;
+mod day2;
 // mod day20;
 // mod day21;
 // mod day22;
@@ -47,7 +47,7 @@ mod day1;
 fn run<R: Read>(day: u8, r: R) {
     match day {
         1 => day1::run(r),
-        // 2 => day2::run(r),
+        2 => day2::run(r),
         // 3 => day3::run(r),
         // 4 => day4::run(r),
         // 5 => day5::run(r),
