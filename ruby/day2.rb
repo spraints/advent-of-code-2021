@@ -1,17 +1,19 @@
 script = $stdin.read
 
-$depth = 0
 $dist = 0
+$aim = 0
+$depth = 0
 def forward(n)
   $dist += n
+  $depth += $aim*n
 end
 
 def down(n)
-  $depth += n
+  $aim += n
 end
 
 def up(n)
-  $depth -= n
+  $aim -= n
 end
 
 eval script
