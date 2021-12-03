@@ -15,3 +15,4 @@ set +e
 set -x
 diff -u all.txt tmp/ruby.out
 diff -u all.txt tmp/rust.out
+target/release/advent-of-code-2021 timed
