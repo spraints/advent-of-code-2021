@@ -1,20 +1,6 @@
-bit_counts = []
-numbers = []
-
-readlines(chomp:true).each do |line|
-  numbers << line
-  line.each_char.with_index do |c, i|
-    bit_counts[i] ||= [0,0]
-    case c
-    when "0"
-      bit_counts[i][0] += 1
-    when "1"
-      bit_counts[i][1] += 1
-    else
-      raise "boom #{line.inspect} #{c.inspect}/#{i}"
-    end
-  end
-end
+numbers = readlines.map(&:strip)
+nchars = numbers.map(&:chars)
+bit_counts = nchars.shift.zip(*nchars).map(&:tally).map { |c| [c["0"], c["1"]] }
 
 gamma = bit_counts.map { |a,b| a > b ? 0 : 1 }.inject { |n, b| n*2 + b }
 epsilon = bit_counts.map { |a,b| a > b ? 1 : 0 }.inject { |n, b| n*2 + b }
