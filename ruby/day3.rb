@@ -1,36 +1,69 @@
-reports = readlines.map(&:strip).map { |s| s.split("").map(&:to_i) }
-r2 = reports.dup
+class BitTree
+  def initialize
+    @n0 = @n1 = 0
+  end
 
-def dec(n)
-  n.join.to_i(2)
-end
+  attr_reader :n0, :n1, :ones, :zeros
 
-a = reports.shift
-mask = dec(a.map { 1 })
-gamma = a.zip(*reports).map { |d| d.sum > d.size/2 ? 1 : 0 }
-gamma = dec(gamma)
-epsilon = gamma ^ mask
+  def one
+    @n1 += 1
+    @ones ||= BitTree.new
+  end
 
-puts "part 1: #{gamma * epsilon}"
-# not 14375442
+  def zero
+    @n0 += 1
+    @zeros ||= BitTree.new
+  end
 
-def apply_bit_criteria(ar, i)
-  zeros, ones = ar.partition { |n| n[i] == 0 }
-  if zeros.size > ones.size
-    [zeros, ones]
-  else
-    [ones, zeros]
+  def o2(res = 0)
+    return res if @n0 + @n1 == 0
+    if @n0 > @n1
+      @zeros.o2(res*2)
+    else
+      @ones.o2(res*2 + 1)
+    end
+  end
+
+  def co2(res = 0)
+    return res if @n0 + @n1 == 0
+    if @n0 > @n1
+      if @n0 == 1
+        @zeros.o2(res*2)
+      else
+        @ones.co2(res*2 + 1)
+      end
+    else
+      if @n1 == 1 && @n0 == 0
+        @ones.o2(res*2 + 1)
+      else
+        @zeros.co2(res*2)
+      end
+    end
   end
 end
 
-o2 = r2
-co2 = r2
-r2.first.each_with_index do |_, i|
-  o2, _ = apply_bit_criteria(o2, i) unless o2.size == 1
-  _, co2 = apply_bit_criteria(co2, i) unless co2.size == 1
+bit_counts = []
+bit_count_tree = BitTree.new
+
+readlines(chomp:true).each do |line|
+  t = bit_count_tree
+  line.each_char.with_index do |c, i|
+    bit_counts[i] ||= [0,0]
+    case c
+    when "0"
+      bit_counts[i][0] += 1
+      t = t.zero
+    when "1"
+      bit_counts[i][1] += 1
+      t = t.one
+    else
+      raise "boom #{line.inspect} #{c.inspect}/#{i}"
+    end
+  end
 end
 
-#p o2: o2, co2: co2
-o2 = dec(o2.first)
-co2 = dec(co2.first)
-puts "part 2: #{o2*co2}"
+gamma = bit_counts.map { |a,b| a > b ? 0 : 1 }.inject { |n, b| n*2 + b }
+epsilon = bit_counts.map { |a,b| a > b ? 1 : 0 }.inject { |n, b| n*2 + b }
+puts "part 1: #{gamma * epsilon}"
+
+puts "part 2: #{bit_count_tree.o2 * bit_count_tree.co2}"
