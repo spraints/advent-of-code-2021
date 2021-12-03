@@ -2,16 +2,16 @@ reports = readlines.map(&:strip).map { |s| s.split("").map(&:to_i) }
 r2 = reports.dup
 
 def dec(n)
-  n.inject { |n, b| (n*2)+b }
+  n.join.to_i(2)
 end
 
 a = reports.shift
-mask = a.inject(0) { |m, _| m*2+1 }
-gamma = a.zip(*reports).map { |d| d.count { |bit| bit == 1 } > d.size/2 ? 1 : 0 }
+mask = dec(a.map { 1 })
+gamma = a.zip(*reports).map { |d| d.sum > d.size/2 ? 1 : 0 }
 gamma = dec(gamma)
 epsilon = gamma ^ mask
 
-puts gamma * epsilon
+puts "part 1: #{gamma * epsilon}"
 # not 14375442
 
 def apply_bit_criteria(ar, i)
@@ -30,7 +30,7 @@ r2.first.each_with_index do |_, i|
   _, co2 = apply_bit_criteria(co2, i) unless co2.size == 1
 end
 
-p o2: o2, co2: co2
+#p o2: o2, co2: co2
 o2 = dec(o2.first)
 co2 = dec(co2.first)
-p o2*co2
+puts "part 2: #{o2*co2}"
