@@ -4,13 +4,22 @@ def main
 
   boards = boards.map { |raw| make_board(raw) }
 
-  draws.split(",").each do |n|
+  winners = []
+  draws.split(",").each_with_index do |n, i|
     n = n.to_i
-    if winner = call(boards, n)
-      puts "part 1: #{score(winner, n)}"
-      return
+    call(boards, n)
+    w, boards = boards.partition { |board| winner?(board) }
+    w.each do |board|
+      winners << [board, n]
+    end
+    if boards.empty?
+      p i
+      break
     end
   end
+
+  puts "part 1: #{score(*winners.first)}"
+  puts "part 2: #{score(*winners.last)}"
 end
 
 def score(board, n)
@@ -19,15 +28,11 @@ def score(board, n)
 end
 
 def call(boards, n)
-  #puts "#{n}!"
   boards.each do |board|
     if tile = board[:tiles][n]
       tile[:flipped] = true
-      return board if winner?(board)
     end
-    #pretty_board(board)
   end
-  nil
 end
 
 def pretty_board(board)
