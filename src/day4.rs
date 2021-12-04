@@ -9,7 +9,8 @@ pub fn run<R: Read>(r: R) {
     for section in sections {
         boards.push(parse_board(section));
     }
-    let mut winners = vec![];
+    let mut first_winner = None;
+    let mut last_winner = None;
     for n in order.split(',') {
         let n = n.parse().unwrap();
         let (ww, ll): (Vec<Board>, Vec<Board>) = boards
@@ -17,12 +18,16 @@ pub fn run<R: Read>(r: R) {
             .map(|board| board.play(n))
             .partition(|board| board.is_winner());
         for w in ww.into_iter() {
-            winners.push(n * w.unused());
+            let score = n * w.unused();
+            last_winner = Some(score);
+            if first_winner.is_none() {
+                first_winner = Some(score);
+            }
         }
         boards = ll;
     }
-    println!("part 1: {}", winners.first().unwrap());
-    println!("part 2: {}", winners.last().unwrap());
+    println!("part 1: {}", first_winner.unwrap());
+    println!("part 2: {}", last_winner.unwrap());
 }
 
 struct Board {
