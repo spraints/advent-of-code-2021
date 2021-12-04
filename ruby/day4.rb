@@ -5,16 +5,12 @@ def main
   boards = boards.map { |raw| make_board(raw) }
 
   winners = []
-  draws.split(",").each_with_index do |n, i|
+  draws.split(",").each do |n|
     n = n.to_i
     call(boards, n)
     w, boards = boards.partition { |board| winner?(board) }
     w.each do |board|
       winners << [board, n]
-    end
-    if boards.empty?
-      p i
-      break
     end
   end
 
