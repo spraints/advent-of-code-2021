@@ -17,17 +17,12 @@ pub fn run<R: Read>(r: R) {
             .map(|board| board.play(n))
             .partition(|board| board.is_winner());
         for w in ww.into_iter() {
-            winners.push((n, w));
+            winners.push(n * w.unused());
         }
         boards = ll;
     }
-    println!("part 1: {}", score(winners.first().unwrap()));
-    println!("part 2: {}", score(winners.last().unwrap()));
-}
-
-fn score(winner: &(u32, Board)) -> u32 {
-    let (n, board) = winner;
-    n * board.unused()
+    println!("part 1: {}", winners.first().unwrap());
+    println!("part 2: {}", winners.last().unwrap());
 }
 
 struct Board {
