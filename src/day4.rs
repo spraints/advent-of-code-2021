@@ -10,7 +10,7 @@ pub fn run<R: Read>(r: R) {
         boards.push(parse_board(section));
     }
     let mut winners = vec![];
-    for n in order.split(",") {
+    for n in order.split(',') {
         let n = n.parse().unwrap();
         let (ww, ll): (Vec<Board>, Vec<Board>) = boards
             .into_iter()

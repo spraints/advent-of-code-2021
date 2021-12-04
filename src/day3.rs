@@ -1,8 +1,10 @@
 use super::common::read_lines::read_lines;
 use std::io::Read;
 
+type ParsedLine = (Vec<char>, u32);
+
 pub fn run<R: Read>(r: R) {
-    let numbers: Vec<(Vec<char>, u32)> = read_lines(r)
+    let numbers: Vec<ParsedLine> = read_lines(r)
         .map(|s| (s.chars().collect(), u32::from_str_radix(&s, 2).unwrap()))
         .collect();
 
@@ -14,7 +16,7 @@ pub fn run<R: Read>(r: R) {
     println!("part 2: {}", o2 * co2);
 }
 
-fn rates(numbers: &Vec<(Vec<char>, u32)>) -> (u32, u32) {
+fn rates(numbers: &[ParsedLine]) -> (u32, u32) {
     let mut ones = vec![];
     ones.resize(numbers[0].0.len(), 0);
     for (bits, _) in numbers {
@@ -33,12 +35,13 @@ fn rates(numbers: &Vec<(Vec<char>, u32)>) -> (u32, u32) {
     })
 }
 
-fn search(n: &Vec<(Vec<char>, u32)>, want_most: bool) -> u32 {
-    let mut vals: Vec<(usize, u32)> = n.iter().map(|(_, val)| *val).enumerate().collect();
+type Vals = Vec<(usize, u32)>;
+
+fn search(n: &[ParsedLine], want_most: bool) -> u32 {
+    let mut vals: Vals = n.iter().map(|(_, val)| *val).enumerate().collect();
     let mut i = 0;
     loop {
-        let (zeros, ones): (Vec<(usize, u32)>, Vec<(usize, u32)>) =
-            vals.into_iter().partition(|(ni, val)| n[*ni].0[i] == '0');
+        let (zeros, ones): (Vals, Vals) = vals.into_iter().partition(|(ni, _)| n[*ni].0[i] == '0');
         if zeros.len() > ones.len() {
             if want_most {
                 vals = zeros;
