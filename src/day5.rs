@@ -1,4 +1,5 @@
 use super::common::read_lines::read_lines;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::io::Read;
 
@@ -13,12 +14,10 @@ pub fn run<R: Read>(r: R) {
 
 fn fill(map: &mut HashMap<Point, usize>, points: Vec<Line>) {
     for (p1, p2) in points {
-        // println!("{:?} -> {:?}", p1, p2);
         let step = (step(p1.0, p2.0), step(p1.1, p2.1));
         let mut p = p1;
         loop {
             let last = p == p2;
-            // println!("{:?}", p);
             let counter = map.entry(p).or_insert(0);
             *counter += 1;
             if last {
@@ -30,12 +29,10 @@ fn fill(map: &mut HashMap<Point, usize>, points: Vec<Line>) {
 }
 
 fn step(from: i32, to: i32) -> i32 {
-    if from == to {
-        0
-    } else if from > to {
-        -1
-    } else {
-        1
+    match from.cmp(&to) {
+        Ordering::Greater => -1,
+        Ordering::Equal => 0,
+        Ordering::Less => 1,
     }
 }
 
