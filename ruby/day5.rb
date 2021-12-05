@@ -33,9 +33,6 @@ def main
   end
 
   puts "part 2: #{filled.count { |_, n| n > 1 }}"
-
-  #puts "part 1: #{score(*winners.first)}"
-  #puts "part 2: #{score(*winners.last)}"
 end
 
 main
