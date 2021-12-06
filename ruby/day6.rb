@@ -1,17 +1,27 @@
 def main
-  fishes = $stdin.read.strip.split(",").map(&:to_i)
+  ft = $stdin.read.strip.split(",").map(&:to_i).tally
+  #p ft
   80.times do
-    new_fishes = fishes.select { |f| f == 0 }.map { 8 }
-    fishes = fishes.map { _1 == 0 ? 6 : _1 - 1}
-    fishes += new_fishes
+    newft = {}
+    babies = ft.delete(0) and newft[8] = babies
+    ft.each do |age, count|
+      newft[age - 1] = count
+    end
+    newft[6] = (newft[6] || 0) + babies if babies
+    ft = newft
+    #p ft
   end
-  puts "part 1: #{fishes.size}"
+  puts "part 1: #{ft.values.sum}"
   (256-80).times do
-    new_fishes = fishes.select { |f| f == 0 }.map { 8 }
-    fishes = fishes.map { _1 == 0 ? 6 : _1 - 1}
-    fishes += new_fishes
+    newft = {}
+    babies = ft.delete(0) and newft[8] = babies
+    ft.each do |age, count|
+      newft[age - 1] = count
+    end
+    newft[6] = (newft[6] || 0) + babies if babies
+    ft = newft
   end
-  puts "part 2: #{fishes.size}"
+  puts "part 2: #{ft.values.sum}"
 end
 
 main
