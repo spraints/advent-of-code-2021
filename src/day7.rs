@@ -8,7 +8,7 @@ pub fn run<R: Read>(r: R) {
         .split(',')
         .map(|s| s.parse().unwrap())
         .collect();
-    positions.sort();
+    positions.sort_unstable();
     println!(
         "part 1: {}",
         cost1(&positions, positions[positions.len() / 2])
