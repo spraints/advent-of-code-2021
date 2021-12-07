@@ -13,18 +13,8 @@ pub fn run<R: Read>(r: R) {
         "part 1: {}",
         cost1(&positions, positions[positions.len() / 2])
     );
-    let min = *positions.first().unwrap();
-    let max = *positions.last().unwrap();
-    let mut mincost = None;
-    for pos in min..=max {
-        let cost = cost2(&positions, pos);
-        mincost = Some(match mincost {
-            None => cost,
-            Some(x) if x > cost => cost,
-            Some(x) => x,
-        });
-    }
-    println!("part 2: {}", mincost.unwrap());
+
+    println!("part 2: {}", cost2(&positions, mean(&positions)));
 }
 
 fn cost1(positions: &[i64], dest: i64) -> i64 {
@@ -37,4 +27,8 @@ fn cost2(positions: &[i64], dest: i64) -> i64 {
         .map(|pos| (*pos - dest).abs())
         .map(|dist| dist * (dist + 1) / 2)
         .sum()
+}
+
+fn mean(positions: &[i64]) -> i64 {
+    positions.iter().sum::<i64>() / positions.len() as i64
 }
