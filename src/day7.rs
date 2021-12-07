@@ -18,11 +18,12 @@ pub fn run<R: Read>(r: R) {
     let mut mincost = None;
     for pos in min..=max {
         let cost = cost2(&positions, pos);
-        mincost = Some(match mincost {
-            None => cost,
-            Some(x) if x > cost => cost,
-            Some(x) => x,
-        });
+        if let Some(x) = mincost {
+            if cost > x {
+                break;
+            }
+        }
+        mincost = Some(cost);
     }
     println!("part 2: {}", mincost.unwrap());
 }
