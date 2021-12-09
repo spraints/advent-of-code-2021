@@ -17,7 +17,7 @@ def main
   puts "part 1: #{lows.map { |x, y| input[x][y] + 1 }.sum}"
   # 436 ^^
   basins = lows.map { |x,y| basin_size(input, x, y) }
-  p basins: basins
+  #p basins: basins
   puts "part 2: #{basins.sort.reverse.take(3).inject { |a,b| a * b }}"
 end
 
