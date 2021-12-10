@@ -17,6 +17,96 @@ pub fn run<R: Read>(r: R) {
     println!("part 2: {}", nums.into_iter().sum::<u32>());
 }
 
+pub fn run_ttaylor<R: Read>(r: R) {
+    let lines: Vec<Line> = read_lines(r)
+        .map(|line| parse_line(&line))
+        .collect::<Result<Vec<Line>, _>>()
+        .unwrap();
+
+    println!("part 1: {}", count_simple(&lines));
+    let part2 = lines.iter().map(|line| decode2(line)).sum::<usize>();
+    println!("part 2: {}", part2);
+}
+
+// This is based on ttaylor's solution (ruby):
+//
+// $seed = [1, 4, 7, 8]
+// $segments = [
+//   "abcefg",
+//   "cf",
+//   "acdeg",
+//   "acdfg",
+//   "bcdf",
+//   "abdfg",
+//   "abdefg",
+//   "acf",
+//   "abcdefg",
+//   "abcdfg",
+// ].map(&:chars)
+//
+// def find_signal(decoded, signals, n)
+//   matching = signals.filter { |s| s.length == $segments[n].length }
+//   matching.detect do |signal|
+//     decoded.each_with_index \
+//       .reject { |d, _| d.nil? } \
+//       .all? { |d, i| (signal & d).length == ($segments[n] & $segments[i]).length }
+//   end
+// end
+//
+// part_1 = 0
+// part_2 = 0
+//
+// File.readlines("input.txt").each do |x|
+//   decoded = Array.new(10)
+//
+//   signals, out = x.split(" | ").map { |str| str.split(" ").map { |s| s.chars.to_set } }
+//
+//   order = $seed + (10.times.to_a - $seed)
+//   order.each { |i| decoded[i] = find_signal(decoded, signals, i) }
+//
+//   part_1 += out.count { |x| $seed.include? decoded.index(x) }
+//   part_2 += out.inject(0) { |got, x| got * 10 + decoded.index(x) }
+// end
+fn decode2(line: &Line) -> usize {
+    let mut decoded = [0; 10];
+    for i in ORDER {
+        decoded[i] = find_signal(&decoded, &line.key, i).unwrap();
+    }
+    //println!("{:?}", decoded);
+    line.code.iter().fold(0, |code, digit| {
+        code * 10 + decoded.iter().position(|x| x == digit).unwrap()
+    })
+}
+
+const ORDER: [usize; 10] = [1, 4, 7, 8, 0, 2, 3, 5, 6, 9];
+const REFERENCE: [u8; 10] = [
+    0b1110111, //   "abcefg",
+    0b0010010, //   "cf",
+    0b1011101, //   "acdeg",
+    0b1011011, //   "acdfg",
+    0b0111010, //   "bcdf",
+    0b1101011, //   "abdfg",
+    0b1101111, //   "abdefg",
+    0b1010010, //   "acf",
+    0b1111111, //   "abcdefg",
+    0b1111011, //   "abcdfg",
+];
+
+fn find_signal(decoded: &[u8], key: &Key, n: usize) -> Option<u8> {
+    key.iter()
+        .find(|x| {
+            x.count_ones() == REFERENCE[n].count_ones()
+                && decoded
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, d)| **d != 0)
+                    .all(|(i, d)| {
+                        (*x & d).count_ones() == (REFERENCE[n] & REFERENCE[i]).count_ones()
+                    })
+        })
+        .and_then(|x| Some(*x))
+}
+
 struct Line {
     key: Key,
     code: Code,

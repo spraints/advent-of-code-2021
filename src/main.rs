@@ -11,6 +11,7 @@ fn main() {
         Some(arg) => match arg.as_str() {
             "timed" => time_all(),
             "all" => all(),
+            "8tt" => day8::run_ttaylor(stdin()),
             day => run(day.parse().unwrap(), stdin()),
         },
     };
