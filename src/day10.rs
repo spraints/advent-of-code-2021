@@ -8,6 +8,7 @@ pub fn run<R: Read>(r: R) {
         let (corrupt, incomplete) = analyze(&line);
         part1 += corrupt;
         if let Some(incomplete) = incomplete {
+            //println!("{} => {}", line, incomplete);
             part2.push(incomplete);
         }
     }
@@ -30,6 +31,62 @@ pub fn run_int<R: Read>(r: R) {
     println!("part 1: {}", part1);
     part2.sort_unstable();
     println!("part 2: {}", part2[part2.len() / 2]);
+}
+
+pub fn run_rec<R: Read>(r: R) {
+    let mut part1 = 0;
+    let mut part2 = vec![];
+    for line in read_lines(r) {
+        //println!("{}", line);
+        match analyze_rec(line.chars()).unwrap() {
+            Score::Corrupt(score) => part1 += score,
+            Score::Incomplete(score) => {
+                //println!("incomplete: {}", score);
+                part2.push(score);
+            }
+        };
+    }
+    println!("part 1: {}", part1);
+    part2.sort_unstable();
+    println!("part 2: {}", part2[part2.len() / 2]);
+}
+
+fn analyze_rec<I: Iterator<Item = char>>(mut line: I) -> Option<Score> {
+    match want_close(&mut line, 0, 0) {
+        Some(Score::Incomplete(x)) => Some(Score::Incomplete(x / 5)),
+        x => x,
+    }
+}
+
+fn want_close<I: Iterator<Item = char>>(line: &mut I, open: u64, depth: usize) -> Option<Score> {
+    //println!("[{}] open: {}", depth, open);
+    loop {
+        match line.next() {
+            None => {
+                //println!("[{}] didn't find close for {}", depth, open);
+                return Some(Score::Incomplete(open));
+            }
+            Some(c) => match analyze_char(c) {
+                Char::Close(ac_score, c_score) => {
+                    if ac_score == open {
+                        //println!("[{}] close: {} {}", depth, c, ac_score);
+                        return None;
+                    } else {
+                        //println!("[{}] unexpected: {} {}", depth, c, ac_score);
+                        return Some(Score::Corrupt(c_score));
+                    }
+                }
+                Char::Open(x) => match want_close(line, x, depth + 1) {
+                    Some(Score::Incomplete(score)) => {
+                        //println!("[{}] also didn't find close for {}", depth, open);
+                        return Some(Score::Incomplete(score * 5 + open));
+                    }
+                    Some(score) => return Some(score),
+                    None => (),
+                },
+            },
+        };
+    }
 }
 
 enum Score {

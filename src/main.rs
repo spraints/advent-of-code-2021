@@ -13,6 +13,7 @@ fn main() {
             "all" => all(),
             "8tt" => day8::run_ttaylor(stdin()),
             "10int" => day10::run_int(stdin()),
+            "10rec" => day10::run_rec(stdin()),
             day => run(day.parse().unwrap(), stdin()),
         },
     };
@@ -98,7 +99,10 @@ fn time_all() {
         time(day);
         match day {
             8 => time_fn(8, "(ttaylor)", day8::run_ttaylor),
-            10 => time_fn(10, "(no stack)", |r| day10::run_int(r)),
+            10 => {
+                time_fn(10, "(int accumulator)", |r| day10::run_int(r));
+                time_fn(10, "(recursive)", |r| day10::run_rec(r));
+            }
             _ => (),
         };
     }
