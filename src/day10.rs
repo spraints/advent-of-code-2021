@@ -38,12 +38,13 @@ pub fn run_rec<R: Read>(r: R) {
     let mut part2 = vec![];
     for line in read_lines(r) {
         //println!("{}", line);
-        match analyze_rec(line.chars()).unwrap() {
-            Score::Corrupt(score) => part1 += score,
-            Score::Incomplete(score) => {
+        match analyze_rec(line.chars()) {
+            Some(Score::Corrupt(score)) => part1 += score,
+            Some(Score::Incomplete(score)) => {
                 //println!("incomplete: {}", score);
                 part2.push(score);
             }
+            None => println!("{} was unexpectedly correct!", line),
         };
     }
     println!("part 1: {}", part1);
