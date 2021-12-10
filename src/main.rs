@@ -96,6 +96,11 @@ fn time_all() {
     let start = Instant::now();
     for day in 1..=25 {
         time(day);
+        match day {
+            8 => time_fn(8, "(ttaylor)", day8::run_ttaylor),
+            10 => time_fn(10, "(no stack)", |r| day10::run_int(r)),
+            _ => (),
+        };
     }
     println!(
         "*** total time: {} ms",
@@ -107,10 +112,20 @@ fn time(day: u8) {
     if let Ok(f) = open_input(day) {
         let start = Instant::now();
         run(day, f);
-        println!(
-            "** day {}: {} ms",
-            day,
-            1000.0 * start.elapsed().as_secs_f32()
-        );
+        let ms = elapsed_ms(start);
+        println!("** day {}: {} ms", day, ms);
     }
+}
+
+fn time_fn<F: Fn(File)>(day: u8, label: &str, run: F) {
+    if let Ok(f) = open_input(day) {
+        let start = Instant::now();
+        run(f);
+        let ms = elapsed_ms(start);
+        println!("** day {} {}: {} ms", day, label, ms);
+    }
+}
+
+fn elapsed_ms(start: Instant) -> f32 {
+    1000.0 * start.elapsed().as_secs_f32()
 }

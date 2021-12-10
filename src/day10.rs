@@ -8,7 +8,6 @@ pub fn run<R: Read>(r: R) {
         let (corrupt, incomplete) = analyze(&line);
         part1 += corrupt;
         if let Some(incomplete) = incomplete {
-            println!("{} => {}", line, incomplete);
             part2.push(incomplete);
         }
     }
@@ -24,7 +23,6 @@ pub fn run_int<R: Read>(r: R) {
         match analyze_int(&line) {
             Score::Corrupt(score) => part1 += score,
             Score::Incomplete(score) => {
-                println!("{} => {}", line, score);
                 part2.push(score);
             }
         };
