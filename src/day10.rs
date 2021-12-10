@@ -52,38 +52,42 @@ pub fn run_rec<R: Read>(r: R) {
     println!("part 2: {}", part2[part2.len() / 2]);
 }
 
-fn analyze_rec<I: Iterator<Item = char>>(mut line: I) -> Option<Score> {
-    match want_close(&mut line, 0, 0) {
-        Some(Score::Incomplete(x)) => Some(Score::Incomplete(x / 5)),
-        x => x,
+fn analyze_rec<I: Iterator<Item = char>>(line: I) -> Option<Score> {
+    match want_close(line, 0, 0) {
+        (_, Some(Score::Incomplete(x))) => Some(Score::Incomplete(x / 5)),
+        (_, x) => x,
     }
 }
 
-fn want_close<I: Iterator<Item = char>>(line: &mut I, open: u64, depth: usize) -> Option<Score> {
+fn want_close<I: Iterator<Item = char>>(
+    mut line: I,
+    open: u64,
+    depth: usize,
+) -> (I, Option<Score>) {
     //println!("[{}] open: {}", depth, open);
     loop {
         match line.next() {
             None => {
                 //println!("[{}] didn't find close for {}", depth, open);
-                return Some(Score::Incomplete(open));
+                return (line, Some(Score::Incomplete(open)));
             }
             Some(c) => match analyze_char(c) {
                 Char::Close(ac_score, c_score) => {
                     if ac_score == open {
                         //println!("[{}] close: {} {}", depth, c, ac_score);
-                        return None;
+                        return (line, None);
                     } else {
                         //println!("[{}] unexpected: {} {}", depth, c, ac_score);
-                        return Some(Score::Corrupt(c_score));
+                        return (line, Some(Score::Corrupt(c_score)));
                     }
                 }
                 Char::Open(x) => match want_close(line, x, depth + 1) {
-                    Some(Score::Incomplete(score)) => {
+                    (line, Some(Score::Incomplete(score))) => {
                         //println!("[{}] also didn't find close for {}", depth, open);
-                        return Some(Score::Incomplete(score * 5 + open));
+                        return (line, Some(Score::Incomplete(score * 5 + open)));
                     }
-                    Some(score) => return Some(score),
-                    None => (),
+                    (line, Some(score)) => return (line, Some(score)),
+                    (nl, None) => line = nl,
                 },
             },
         };
