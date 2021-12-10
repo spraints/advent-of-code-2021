@@ -46,12 +46,17 @@ enum Char {
 
 fn analyze_int(line: &str) -> Score {
     let mut incomplete = 0;
+    let mut scale = 1;
     for c in line.chars() {
         match analyze_char(c) {
-            Char::Open(ac_score) => incomplete = incomplete * 5 + ac_score,
+            Char::Open(ac_score) => {
+                incomplete += scale * ac_score;
+                scale *= 5;
+            }
             Char::Close(ac_score, c_score) => {
-                if incomplete % 5 == ac_score {
-                    incomplete /= 5;
+                scale /= 5;
+                if incomplete / scale == ac_score {
+                    incomplete %= scale;
                 } else {
                     return Score::Corrupt(c_score);
                 }
