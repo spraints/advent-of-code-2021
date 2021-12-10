@@ -12,6 +12,7 @@ fn main() {
             "timed" => time_all(),
             "all" => all(),
             "8tt" => day8::run_ttaylor(stdin()),
+            "10int" => day10::run_int(stdin()),
             day => run(day.parse().unwrap(), stdin()),
         },
     };
