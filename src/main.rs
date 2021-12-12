@@ -23,7 +23,7 @@ mod common;
 
 mod day1;
 mod day10;
-// mod day11;
+mod day11;
 // mod day12;
 // mod day13;
 // mod day14;
@@ -59,7 +59,7 @@ fn run<R: Read>(day: u8, r: R) {
         8 => day8::run(r),
         9 => day9::run(r),
         10 => day10::run(r),
-        // 11 => day11::run(r),
+        11 => day11::run(r),
         // 12 => day12::run(r),
         // 13 => day13::run(r),
         // 14 => day14::run(r),
