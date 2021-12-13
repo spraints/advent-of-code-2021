@@ -20,7 +20,7 @@ def main
 end
 
 def draw(grid)
-  puts grid.map { |row| (row||[]).map { |x| x ? "#" : "." }.join }
+  puts grid.map { |row| (row||[]).map { |x| x ? "#" : " " }.join.rstrip }
 end
 
 def fold(grid, inst)
