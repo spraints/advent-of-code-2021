@@ -17,7 +17,7 @@ def main
   res = ecounts.values.sort
   puts "part 1: #{res.last - res.first}"
   30.times do |i|
-    puts i
+    #puts i
     counts = update(counts, ecounts, rules)
   end
   res = ecounts.values.sort
