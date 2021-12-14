@@ -2,7 +2,7 @@ require "set"
 
 def main
   init, rules = $stdin.read.split("\n\n")
-  seq = init.chars
+  seq = ll(init.chars)
   rules = rules.lines.map { |line| parse_line(line.strip) }.to_h
   10.times do
     seq = update(seq, rules)
@@ -17,17 +17,23 @@ def main
   puts "part 2: #{counts.last - counts.first}"
 end
 
+def ll(a)
+  a.reverse.inject(nil) { |next_item, c| [c, next_item] }
+end
+
 def update(seq, rules)
-  newseq = []
-  last = ""
-  seq.each do |c|
-    if ins = rules[[last,c]]
-      newseq << ins
+  n = 0
+  p = seq
+  while p
+    q = p[1]
+    if q && ins = rules[[p[0], q[0]]]
+      n += 1
+      p[1] = [ins, q]
     end
-    newseq << c
-    last = c
+    p = q
   end
-  newseq
+  puts "#{n} new items"
+  seq
 end
 
 def parse_line(line)
