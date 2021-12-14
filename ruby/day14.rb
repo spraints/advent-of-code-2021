@@ -2,43 +2,46 @@ require "set"
 
 def main
   init, rules = $stdin.read.split("\n\n")
-  seq = ll(init.chars)
+  counts = init.chars.each_cons(2).map(&:join).tally
+  ecounts = init.chars.tally
   rules = rules.lines.map { |line| parse_line(line.strip) }.to_h
+  #puts init
+  #p counts
+  #p ecounts
+  #p rules
   10.times do
-    seq = update(seq, rules)
+    counts = update(counts, ecounts, rules)
+    #p counts
   end
-  counts = seq.tally.values.sort
-  puts "part 1: #{counts.last - counts.first}"
+  #return
+  res = ecounts.values.sort
+  puts "part 1: #{res.last - res.first}"
   30.times do |i|
     puts i
-    seq = update(seq, rules)
+    counts = update(counts, ecounts, rules)
   end
-  counts= seq.tally.values.sort
-  puts "part 2: #{counts.last - counts.first}"
+  res = ecounts.values.sort
+  puts "part 2: #{res.last - res.first}"
 end
 
-def ll(a)
-  a.reverse.inject(nil) { |next_item, c| [c, next_item] }
-end
-
-def update(seq, rules)
-  n = 0
-  p = seq
-  while p
-    q = p[1]
-    if q && ins = rules[[p[0], q[0]]]
-      n += 1
-      p[1] = [ins, q]
+def update(counts, ecounts, rules)
+  newcounts = Hash.new(0)
+  counts.each do |pair, count|
+    if ins = rules[pair]
+      newcounts[ins[0]] += count
+      newcounts[ins[1]] += count
+      ecounts[ins[2]] = (ecounts[ins[2]] || 0) + count
+    else
+      newcounts[pair] = count
     end
-    p = q
   end
-  puts "#{n} new items"
-  seq
+  newcounts
 end
 
 def parse_line(line)
   pair, add = line.split(" -> ")
-  [pair.chars, add]
+  a, b = pair.chars
+  [pair, ["#{a}#{add}", "#{add}#{b}", add]]
 end
 
 main
