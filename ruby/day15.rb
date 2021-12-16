@@ -24,7 +24,7 @@ def least_cost(grid, start, goal)
 
   until open_set.empty?
     current = open_set.sort_by { |node| f_score[node] }.first
-    p current: current, open_set: open_set.size, came_from: came_from.size, g_score: g_score.size, f_score: f_score.size
+    #p current: current, open_set: open_set.size, came_from: came_from.size, g_score: g_score.size, f_score: f_score.size
 
     if current == goal
       return g_score[current]
@@ -84,15 +84,13 @@ class Part2Grid
     @tile_cols = @grid[0].size
     @total_rows = 5 * @tile_rows
     @total_cols = 5 * @tile_cols
-    p total_rows: @total_rows, total_cols: @total_cols
+    #p total_rows: @total_rows, total_cols: @total_cols
   end
 
   def edges(node)
     [
       [0, 1],
-      [0, -1],
       [1, 0],
-      [-1, 0],
     ].map { |dr, dc|
       [dr + node[0], dc + node[1]]
     }.select { |r, c|
