@@ -2,7 +2,10 @@ require "set"
 
 def main
   grid = $stdin.readlines.map { _1.strip.chars.map(&:to_i) }
-  puts "part 1: #{least_cost(grid, [0,0], bottom_right_node(grid))}"
+  br = bottom_right_node(grid)
+  puts "part 1: #{least_cost(Part1Grid.new(grid), [0,0], br)}"
+  puts "part 2: #{least_cost(Part2Grid.new(grid), [0,0], br.map { (_1 + 1) * 5 - 1 })}"
+  #Part2Grid.new(grid).draw
 end
 
 MAX = 999_999_999
@@ -21,13 +24,15 @@ def least_cost(grid, start, goal)
 
   until open_set.empty?
     current = open_set.sort_by { |node| f_score[node] }.first
+    p current: current, open_set: open_set.size, came_from: came_from.size, g_score: g_score.size, f_score: f_score.size
+
     if current == goal
       return g_score[current]
       #return reconstruct_path(came_from, current)
     end
 
     open_set.delete(current)
-    edges(grid, current).each do |neighbor, d|
+    grid.edges(current).each do |neighbor, d|
       tentative_g_score = g_score[current] + d
       if tentative_g_score < g_score[neighbor]
         came_from[neighbor] = current
@@ -53,17 +58,71 @@ def bottom_right_node(grid)
   [r,c]
 end
 
-def edges(grid, node)
-  [
-    [0, 1],
-    [0, -1],
-    [1, 0],
-    [-1, 0],
-  ].map { |dr, dc|
-    [dr + node[0], dc + node[1]]
-  }.select { |r, c| r >= 0 && c >= 0 && r < grid.size && c < grid[0].size }.map { |r, c|
-    [ [r, c], grid[r][c] ]
-  }
+class Part1Grid
+  def initialize(grid)
+    @grid = grid
+  end
+
+  def edges(node)
+    [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ].map { |dr, dc|
+      [dr + node[0], dc + node[1]]
+    }.select { |r, c| r >= 0 && c >= 0 && r < @grid.size && c < @grid[0].size }.map { |r, c|
+      [ [r, c], @grid[r][c] ]
+    }
+  end
+end
+
+class Part2Grid
+  def initialize(grid)
+    @grid = grid
+    @tile_rows = @grid.size
+    @tile_cols = @grid[0].size
+    @total_rows = 5 * @tile_rows
+    @total_cols = 5 * @tile_cols
+    p total_rows: @total_rows, total_cols: @total_cols
+  end
+
+  def edges(node)
+    [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ].map { |dr, dc|
+      [dr + node[0], dc + node[1]]
+    }.select { |r, c|
+      r >= 0 && c >= 0 && r < @total_rows && c < @total_cols
+    }.map { |r, c|
+      [ [r, c], cost_to(r, c) ]
+    }
+  end
+
+  def draw
+    0.upto(@total_rows - 1) do |r|
+      0.upto(@total_cols - 1) do |c|
+        cost = cost_to(r, c)
+        if cost > 9
+          raise "unexpected cost #{r},#{c} => #{cost}"
+        end
+        print cost
+      end
+      print "\n"
+    end
+  end
+
+  private
+
+  def cost_to(r, c)
+    base_cost = @grid[r % @tile_rows][c % @tile_cols] - 1
+    off_r = r / @tile_rows
+    off_c = c / @tile_cols
+    (base_cost + off_r + off_c) % 9 + 1
+  end
 end
 
 main
