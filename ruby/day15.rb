@@ -8,33 +8,46 @@ end
 MAX = 999_999_999
 
 def least_cost(grid, from, to)
-  costs = {from => 0}
   visited = Set.new
-  cost = 0
-  until from == to
-    puts "from #{from}, cost = #{cost}..."
-    visited << from
-    min_cost = MAX
-    edges(grid, from).each do |node, edge_cost|
-      puts "  - consider #{node} (+#{edge_cost}, previously #{costs[node].inspect})"
+  cost = Hash.new(MAX)
+  cost[from] = 0
+  current = from
+  visit_soon = Set.new
+  until visited.include?(to)
+    #puts "node: #{current.inspect} (cost = #{cost[current].inspect})"
+    current_cost = cost[current]
+    edges(grid, current).each do |node, edge_cost|
       next if visited.include?(node)
-      puts "    + not visited yet"
-      new_cost = cost + edge_cost
-      node_cost = costs[node]
-      if node_cost.nil? || node_cost > new_cost
-        puts "    + update cost to #{new_cost}"
-        node_cost = costs[node] = new_cost
-      end
-      if node_cost < min_cost
-        puts "    ++ use it!"
-        min_cost = node_cost
-        from = node
-      end
+      cost[node] = [current_cost + edge_cost, cost[node]].min
+      #puts "  - cost of #{node.inspect} is now #{cost[node]}"
+      visit_soon << node
+      p visit_soon: visit_soon
     end
-    raise :boom if min_cost == MAX
-    cost = min_cost
+    puts "after visiting #{current.inspect}"
+    grid.each_with_index do |row, r|
+      row.each_with_index do |_, c|
+        if current == [r,c]
+          printf "%3d* ", cost[[r,c]]
+        elsif visited.include?([r,c])
+          printf "%3dx ", cost[[r,c]]
+        elsif cost.include?([r,c])
+          printf "%3d  ", cost[[r,c]]
+        elsif to == [r,c]
+          printf " > < "
+        else
+          printf "     "
+        end
+      end
+      printf "\n"
+    end
+    visited << current
+    p visit_soon: visit_soon
+    raise "boom" if visit_soon.empty?
+    current = visit_soon.sort_by { |n| cost[n] }.first
+    #p visit_soon: visit_soon
+    visit_soon.delete(current)
   end
-  cost
+  cost[to]
 end
 
 def bottom_right_node(grid)
