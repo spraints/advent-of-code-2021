@@ -2,8 +2,9 @@ require "set"
 
 def main
   data = Stream.new($stdin.read.chars)
-  version_total = decode_packet(data)
+  version_total, value = decode_packet(data)
   puts "part 1: #{version_total}"
+  puts "part 2: #{value}"
 end
 
 $iters = 0
@@ -12,29 +13,56 @@ def decode_packet(data, indent: "")
   #exit 1 if $iters > 20
   #puts "#{indent}[#{data.i}]decode_packet"
 
-  version_sum = data.next(3)
-  case type_id = data.next(3)
-  when 4
-    val = decode_literal(data)
-    #puts "#{indent}->literal: #{val}"
+  version = data.next(3)
+  type_id = data.next(3)
+  if type_id == 4
+    return [version, decode_literal(data)]
+  end
+
+  length_type_id = data.next(1)
+  versions = []
+  values = []
+  if length_type_id == 0
+    total_length = data.next(15)
+    #puts"#{indent}->#{total_length} bits"
+    stop = data.i + total_length
+    while data.i < stop
+      a, b = decode_packet(data, indent: indent + "  ")
+      versions << a
+      values << b
+    end
   else
-    length_type_id = data.next(1)
-    if length_type_id == 0
-      total_length = data.next(15)
-      #puts"#{indent}->#{total_length} bits"
-      stop = data.i + total_length
-      while data.i < stop
-        version_sum += decode_packet(data, indent: indent + "  ")
-      end
-    else
-      total_packets = data.next(11)
-      #puts"#{indent}->#{total_packets} packets"
-      total_packets.times do |i|
-        version_sum += decode_packet(data, indent: indent + "  ")
-      end
+    total_packets = data.next(11)
+    #puts"#{indent}->#{total_packets} packets"
+    total_packets.times do |i|
+      a, b = decode_packet(data, indent: indent + "  ")
+      versions << a
+      values << b
     end
   end
-  version_sum
+
+  value =
+    case type_id
+    when 0
+      values.sum
+    when 1
+      values.inject { |a, b| a * b }
+    when 2
+      values.min
+    when 3
+      values.max
+    when 5
+      raise "uh oh" unless values.size == 2
+      values.first > values.last ? 1 : 0
+    when 6
+      raise "uh oh" unless values.size == 2
+      values.first < values.last ? 1 : 0
+    when 7
+      raise "uh oh" unless values.size == 2
+      values.first == values.last ? 1 : 0
+    end
+
+  [version + versions.sum, value]
 end
 
 def decode_literal(data)
