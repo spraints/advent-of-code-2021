@@ -2,16 +2,19 @@ require "set"
 
 def main
   lines = $stdin.readlines.map { |l| eval(l) }
+
   res = lines.inject { |a, b| reduce([a,b]) }
-  p res
-  puts mag(res)
-  #p result: reduce([[[[[9,8],1],2],3],4])
-  #puts "------"
-  #p result: reduce([7,[6,[5,[4,[3,2]]]]])
-  #puts "------"
-  #p result: reduce([[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]])
-  #puts "------"
-  #p result: reduce([[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]])
+  puts "part 1: #{mag(res)}"
+
+  max = 0
+  (0..lines.size-1).each do |i|
+    (0..lines.size-1).each do |j|
+      next if i == j
+      m = mag(reduce([lines[i], lines[j]]))
+      max = m if m > max
+    end
+  end
+  puts "part 2: #{max}"
 end
 
 def mag(sn)
@@ -25,7 +28,6 @@ def mag(sn)
 end
 
 def reduce(sn)
-  p input: sn
   sn = convert(sn)
   loop do
     next if explode(sn)
@@ -46,10 +48,8 @@ def convert(sn, depth: 0, res: [])
 end
 
 def unconvert(sn)
-  p unconvert: sn
   res = [[]]
   while n = sn.shift
-    #p res: res, n: n
     while n[1] < res.size
       loop do
         a = res.pop
