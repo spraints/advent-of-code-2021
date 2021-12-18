@@ -12,7 +12,6 @@ def main
     steps = steps_to_hit_x(x: 0, dx: dx, xr: xr)
     has_inf = steps.delete(:inf)
     steps.each do |n|
-      #p dx: dx, n: n
       dys = (dys_memo[n] ||= dys_for(steps: n, y: 0, yr: yr))
       dys.each do |dy|
         vs << [dx, dy]
@@ -21,12 +20,7 @@ def main
     if has_inf
       (steps.max..max_steps).each do |n|
         dys = (dys_memo[n] ||= dys_for(steps: n, y: 0, yr: yr))
-        #p dx: dx, n: n, dys: dys unless dys.empty?
         dys.each do |dy|
-          p dx: dx, dy: dy, n: n, fin_y: y_after_steps(n, y: 0, dy: dy),
-            max_steps: max_steps,
-            mid_y: y_after_steps(dy, y: 0, dy: dy),
-            zero_y: y_after_steps(1+dy*2, y: 0, dy: dy)
           vs << [dx, dy]
         end
       end
