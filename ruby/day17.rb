@@ -5,6 +5,7 @@ def main
     raise "bad input"
   xr = ($1.to_i..$2.to_i)
   yr = ($3.to_i..$4.to_i)
+  max_steps = 1 + -2*yr.min
   dys_memo = {}
   vs = Set.new
   (1..xr.max).each do |dx|
@@ -18,9 +19,14 @@ def main
       end
     end
     if has_inf
-      (steps.max..steps.max+1000).each do |n|
+      (steps.max..max_steps).each do |n|
         dys = (dys_memo[n] ||= dys_for(steps: n, y: 0, yr: yr))
+        #p dx: dx, n: n, dys: dys unless dys.empty?
         dys.each do |dy|
+          p dx: dx, dy: dy, n: n, fin_y: y_after_steps(n, y: 0, dy: dy),
+            max_steps: max_steps,
+            mid_y: y_after_steps(dy, y: 0, dy: dy),
+            zero_y: y_after_steps(1+dy*2, y: 0, dy: dy)
           vs << [dx, dy]
         end
       end
