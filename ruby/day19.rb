@@ -1,21 +1,34 @@
 require "set"
 
+class Discard
+  def puts(*); end
+  def truncate(*); end
+  def seek(*); end
+end
+
+$dbg = Discard.new # File.open("dbg.out", "w")
+$beacons = Discard.new # File.open("out", "w")
+
 def main
   scanners = $stdin.read.split("\n\n").map { parse_scanner(_1) }
-  scanners= scanners.take(3)
-  p scanners.first.locs.size
+  # scanners= scanners.take(3)
+  # p scanners.first.locs.size
   result = []
   matched = scanners.map { false }
   result.push(scanners[0])
   matched[0] = true
-  p matched: scanners[0].id
+  #p matched: scanners[0].id
   num_matched = 1
   until matched.all?
+    $dbg.truncate(0); $dbg.seek(0)
+    $dbg.puts "NEW ROUND #{matched.inspect}"
     scanners.each_with_index do |s, i|
       next if matched[i]
+      $dbg.puts "ORPHAN #{s.id}"
       s.each_rotation do |rs|
+        $dbg.puts "ROTATION #{rs.id}"
         if ss = find_shifted(rs, result)
-          p matched: ss.id
+          $dbg.puts "FOUND #{ss.id}"
           result.push(ss)
           matched[i] = true
           break
@@ -24,34 +37,53 @@ def main
     end
 
     now_matched = matched.count { _1 }
-    raise "only matched #{num_matched} scanners!" if now_matched == num_matched
+    if now_matched == num_matched
+      p matched
+      puts "SOB only matched #{num_matched}/#{matched.size} scanners!"
+      break
+    end
     num_matched = now_matched
   end
-  #puts "part 1: #{result.beacons.size}"
+  beacons = Set.new
+  result.each do |scanner|
+    scanner.locs.each do |loc|
+      beacons << loc
+    end
+  end
+  $beacons.puts beacons.sort.map { |loc| loc.join(",") }
+  puts "part 1: #{beacons.size} (#{$combos} pairings attempted)"
 end
 
 def find_shifted(scanner, choices)
   choices.each do |cs|
     if off = find_offset(cs, scanner)
-      p id: scanner.id, off: off, from: cs.id
+      #p id: scanner.id, off: off, from: cs.id
       return scanner.plus(off)
     end
   end
   nil
 end
 
+$combos = 0
 def find_offset(reference, floating)
-  mina, locsa = reference.normalize
-  minb, locsb = floating.normalize
-  puts "COMPARISON"
-  puts "#{reference.id} (mins = #{mina.inspect})",
-    reference.locs.zip(locsa).map { |a,b| sprintf "%20s -> %20s", a.inspect, b.inspect }
-  puts "#{floating.id} (mins = #{minb.inspect})",
-    floating.locs.zip(locsb).map { |a,b| sprintf "%20s -> %20s", a.inspect, b.inspect }
-  match = locsa & locsb
-  puts "MATCHED #{match.size}"
-  return nil if match.size < 12
-  mina.zip(minb).map { _1 - _2 }
+  rl = reference.locs#.sort
+  fl = floating.locs#.sort
+  rl.each_with_index do |a, i|
+    fl.each_with_index do |b, j|
+      $combos += 1
+      off = a.zip(b).map { _1 - _2 }
+      $dbg.puts "TRY lining up [#{reference.id}]=#{a.inspect} with [#{floating.id}]=#{b.inspect}"
+      moved = floating.plus(off)
+      ml = moved.locs
+      matches = (rl & ml).size
+      $dbg.puts moved.id,
+        fl.zip(ml, rl).map { sprintf "%20s -> %20s  vs  %20s", _1.inspect, _2.inspect, _3.inspect }
+      $dbg.puts "MATCHES = #{matches}"
+      puts "#{i},#{j}" if matches >= 12
+      return off if matches >= 12
+    end
+  end
+  nil
 end
 
 def parse_scanner(s)
@@ -72,7 +104,7 @@ class Scanner
 
   def plus(offset)
     dx, dy, dz = offset
-    Scanner.new(id: "#{id} offset by #{offset.inspect}",
+    Scanner.new(id: "#{id} (offset by #{offset.inspect})",
                 locs: locs.map { |x,y,z| [x+dx, y+dy, z+dz] })
   end
 
@@ -113,7 +145,7 @@ class Scanner
 
   def _each_z_rotation(s)
     yield s
-    3.times { yield(s = s.rotate_z("", 1)) }
+    (1..3).each { |i| yield s.rotate_z("", i) }
   end
 
   #     z
