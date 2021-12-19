@@ -19,6 +19,7 @@ def main
   matched[0] = true
   #p matched: scanners[0].id
   num_matched = 1
+  tried = {}
   until matched.all?
     $dbg.truncate(0); $dbg.seek(0)
     $dbg.puts "NEW ROUND #{matched.inspect}"
@@ -27,8 +28,9 @@ def main
       $dbg.puts "ORPHAN #{s.id}"
       s.each_rotation do |rs|
         $dbg.puts "ROTATION #{rs.id}"
-        if ss = find_shifted(rs, result)
+        if ss = find_shifted(rs, result, tried)
           $dbg.puts "FOUND #{ss.id}"
+          print "."
           result.push(ss)
           matched[i] = true
           break
@@ -54,8 +56,11 @@ def main
   puts "part 1: #{beacons.size} (#{$combos} pairings attempted)"
 end
 
-def find_shifted(scanner, choices)
+def find_shifted(scanner, choices, tried)
   choices.each do |cs|
+    k = [cs.id, scanner.id]
+    next if tried[k]
+    tried[k] = true
     if off = find_offset(cs, scanner)
       #p id: scanner.id, off: off, from: cs.id
       return scanner.plus(off)
