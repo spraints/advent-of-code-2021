@@ -19,6 +19,12 @@ pub fn run<R: Read>(r: R) {
         .reduce(|a, b| reduce(sum(a, b)))
         .unwrap();
     println!("part 1: {}", mag(&part1));
+
+    let part2 = each_pair(&trees)
+        .map(|(a, b)| mag(&reduce(sum(a.clone(), b.clone()))))
+        .max()
+        .unwrap();
+    println!("part 2: {}", part2);
 }
 
 fn parse_tree(line: &str) -> (SN, &str) {
@@ -50,7 +56,7 @@ fn sum(l: SN, r: SN) -> SN {
 
 fn reduce(mut root: SN) -> SN {
     loop {
-        println!("{:?}", &root);
+        // println!("{:?}", &root);
         if let Some(new_root) = finish_exploding(explode(&root, 0)) {
             root = new_root;
             continue;
@@ -103,7 +109,7 @@ fn explode(node: &SN, depth: usize) -> Explode {
     match node {
         SN::Pair(l, r) if l.is_leaf() && r.is_leaf() => {
             if depth > 3 {
-                println!("explode!");
+                // println!("explode!");
                 Explode::Exploded(l.value().unwrap(), r.value().unwrap())
             } else {
                 Explode::Nothing(pair(unbox(l), unbox(r)))
@@ -188,5 +194,45 @@ impl std::fmt::Debug for SN {
             SN::Pair(l, r) => write!(f, "[{:?},{:?}]", l, r),
             SN::Leaf(v) => write!(f, "{}", v),
         }
+    }
+}
+
+fn each_pair<'a, T>(s: &'a [T]) -> EachPair<'a, T> {
+    EachPair {
+        s,
+        i: 0,
+        j: 0,
+        done: false,
+    }
+}
+
+struct EachPair<'a, T> {
+    s: &'a [T],
+    i: usize,
+    j: usize,
+    done: bool,
+}
+
+impl<'a, T> Iterator for EachPair<'a, T> {
+    type Item = (&'a T, &'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            return None;
+        }
+        let l = self.s.get(self.i).unwrap();
+        let r = self.s.get(self.j).unwrap();
+        self.j += 1;
+        if self.j == self.i {
+            self.j += 1;
+        }
+        if self.j >= self.s.len() {
+            self.j = 0;
+            self.i += 1;
+        }
+        if self.i >= self.s.len() {
+            self.done = true;
+        }
+        Some((l, r))
     }
 }
