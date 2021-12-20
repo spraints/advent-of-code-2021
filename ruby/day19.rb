@@ -9,7 +9,14 @@ end
 $dbg = Discard.new # File.open("dbg.out", "w")
 $beacons = Discard.new # File.open("out", "w")
 
+CACHE = "day19.cache"
+
 def main
+  begin
+    return solve_with_cache(File.read(CACHE))
+  rescue Errno::ENOENT
+  end
+
   scanners = $stdin.read.split("\n\n").map { parse_scanner(_1) }
   # scanners= scanners.take(3)
   # p scanners.first.locs.size
@@ -49,13 +56,50 @@ def main
     num_matched = now_matched
   end
   beacons = Set.new
-  result.each do |scanner|
-    scanner.locs.each do |loc|
-      beacons << loc
+  positions = []
+  File.open(CACHE, "w") do |f|
+    result.each do |scanner|
+      f.puts scanner.id,
+        "position=#{scanner.position.join(",")}",
+        scanner.locs.map { |l| l.join(",") }
+      positions << scanner.position
+      scanner.locs.each do |loc|
+        beacons << loc
+      end
     end
   end
   $beacons.puts beacons.sort.map { |loc| loc.join(",") }
   puts "part 1: #{beacons.size} (#{$combos} pairings attempted)"
+  puts "part 2: #{max_dist(positions)}"
+end
+
+def solve_with_cache(s)
+  beacons = Set.new
+  positions = []
+  s.lines.each do |line|
+    case line
+    when /^position=(-?\d+),(-?\d+),(-?\d+)/
+      positions << [$1, $2, $3].map(&:to_i)
+    when /^(-?\d+),(-?\d+),(-?\d+)$/
+      beacons << [$1, $2, $3].map(&:to_i)
+    end
+  end
+  puts "part 1: #{beacons.size}"
+  puts "part 2: #{max_dist(positions)}"
+end
+
+def max_dist(positions)
+  res = 0
+  positions.each do |a|
+    positions.each do |b|
+      res = [res, dist(a, b)].max
+    end
+  end
+  res
+end
+
+def dist(a, b)
+  a.zip(b).map { (_1 - _2).abs }.inject(&:+)
 end
 
 def find_shifted(scanner, choices)
@@ -95,21 +139,23 @@ def parse_scanner(s)
   #id =~ /scanner (\d+)/ or raise "boom"
   #id = $1
   locs = locs.map { _1.split(",").map(&:to_i) }
-  Scanner.new(id: id, locs: locs)
+  Scanner.new(id: id, locs: locs, position: [0,0,0])
 end
 
 class Scanner
-  def initialize(id:, locs:)
+  def initialize(id:, locs:, position:)
     @id = id
     @locs = locs
+    @position = position
   end
 
-  attr_reader :id, :locs
+  attr_reader :id, :locs, :position
 
   def plus(offset)
     dx, dy, dz = offset
     Scanner.new(id: "#{id} (offset by #{offset.inspect})",
-                locs: locs.map { |x,y,z| [x+dx, y+dy, z+dz] })
+                locs: locs.map { |x,y,z| [x+dx, y+dy, z+dz] },
+                position: position.zip(offset).map { _1 + _2 })
   end
 
   def normalize
@@ -227,7 +273,7 @@ class Scanner
   end
 
   def _xform(label, &block)
-    Scanner.new(id: "#{id} #{label}", locs: locs.map(&block))
+    Scanner.new(id: "#{id} #{label}", locs: locs.map(&block), position: position)
   end
 end
 
