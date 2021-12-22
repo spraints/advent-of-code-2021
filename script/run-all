@@ -8,7 +8,9 @@ cd "$(dirname "$0")/.."
 mkdir -p tmp
 
 cargo build --release
+echo Running Rust...
 target/release/advent-of-code-2021 all > tmp/rust.out
+echo Running Ruby...
 ruby ruby/all.rb > tmp/ruby.out
 
 set +e

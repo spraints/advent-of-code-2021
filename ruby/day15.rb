@@ -4,8 +4,8 @@ def main
   grid = $stdin.readlines.map { _1.strip.chars.map(&:to_i) }
   br = bottom_right_node(grid)
   puts "part 1: #{least_cost(Part1Grid.new(grid), [0,0], br)}"
+  # part 2 isn't right :/
   puts "part 2: #{least_cost(Part2Grid.new(grid), [0,0], br.map { (_1 + 1) * 5 - 1 })}"
-  #Part2Grid.new(grid).draw
 end
 
 MAX = 999_999_999
