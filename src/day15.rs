@@ -1,4 +1,5 @@
 use super::common::read_lines::read_lines;
+use std::collections::HashMap;
 use std::io::Read;
 
 pub fn run<R: Read>(r: R) {
@@ -7,14 +8,6 @@ pub fn run<R: Read>(r: R) {
         .collect::<Vec<Vec<u32>>>();
     println!("part 1: {}", least_cost(&grid));
     let grid = expand(grid);
-    /*
-    for r in grid.iter() {
-        for c in r.iter() {
-            print!("{}", c);
-        }
-        println!("");
-    }
-    */
     println!("part 2: {}", least_cost(&grid));
 }
 
@@ -36,6 +29,8 @@ fn expand(orig: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
 
 const INF: u32 = 999_999_999;
 
+const NEIGHBORS: [(isize, isize); 4] = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+
 fn least_cost(grid: &[Vec<u32>]) -> u32 {
     let rows = grid.len();
     let cols = grid[0].len();
@@ -54,27 +49,29 @@ fn least_cost(grid: &[Vec<u32>]) -> u32 {
     tentative_distance[r][c] = 0;
     let mut dist = 0;
 
-    let (mut est_rows, mut est_cols) = (0, 0);
+    let mut lowest_unvisited_cost = 0;
+    let mut by_cost = HashMap::new();
 
     loop {
-        if r + 1 < rows {
-            update(&mut tentative_distance, &visited, &grid, (r + 1, c), dist);
-        }
-        if c + 1 < cols {
-            update(&mut tentative_distance, &visited, &grid, (r, c + 1), dist);
-        }
-        if r > 0 {
-            update(&mut tentative_distance, &visited, &grid, (r - 1, c), dist);
-        }
-        if c > 0 {
-            update(&mut tentative_distance, &visited, &grid, (r, c - 1), dist);
-        }
-
-        if r + 1 >= est_rows {
-            est_rows = r + 2;
-        }
-        if c + 1 >= est_cols {
-            est_cols = c + 2;
+        for (dr, dc) in NEIGHBORS {
+            let (nr, nc) = (r as isize + dr, c as isize + dc);
+            if nr < 0 || nc < 0 {
+                continue;
+            }
+            let (nr, nc) = (nr as usize, nc as usize);
+            if nr >= rows || nc >= cols || visited[nr][nc] {
+                continue;
+            }
+            let new_dist = dist + grid[nr][nc];
+            if new_dist < tentative_distance[nr][nc] {
+                tentative_distance[nr][nc] = new_dist;
+                let e = by_cost.entry(new_dist).or_insert_with(Vec::new);
+                e.push((nr, nc));
+                if new_dist < lowest_unvisited_cost {
+                    println!("did not expect this to go backwards?");
+                    lowest_unvisited_cost = new_dist;
+                }
+            }
         }
 
         visited[r][c] = true;
@@ -83,41 +80,30 @@ fn least_cost(grid: &[Vec<u32>]) -> u32 {
             return tentative_distance[dest_r][dest_c];
         }
 
-        let (mut next_r, mut next_c) = (0, 0);
-        let mut next_dist = INF;
-        for i in 0..est_rows {
-            if i < rows {
-                for j in 0..est_cols {
-                    if j < cols && !visited[i][j] {
-                        let this_dist = tentative_distance[i][j];
-                        if this_dist < next_dist {
-                            next_dist = this_dist;
-                            next_r = i;
-                            next_c = j;
-                        }
-                    }
-                }
-            }
-        }
-
-        r = next_r;
-        c = next_c;
-        dist = next_dist;
+        let next_point = get_next_node(&mut lowest_unvisited_cost, &mut by_cost, &visited);
+        r = next_point.0;
+        c = next_point.1;
+        dist = tentative_distance[r][c];
     }
 }
 
-fn update(
-    tentative_distance: &mut Vec<Vec<u32>>,
+fn get_next_node(
+    lowest_unvisited_cost: &mut u32,
+    by_cost: &mut HashMap<u32, Vec<(usize, usize)>>,
     visited: &[Vec<bool>],
-    grid: &[Vec<u32>],
-    coords: (usize, usize),
-    dist: u32,
-) {
-    let (r, c) = coords;
-    if !visited[r][c] {
-        let new_dist = dist + grid[r][c];
-        if new_dist < tentative_distance[r][c] {
-            tentative_distance[r][c] = new_dist;
-        }
+) -> (usize, usize) {
+    loop {
+        assert!(*lowest_unvisited_cost < 10_000);
+        match by_cost.get_mut(lowest_unvisited_cost) {
+            None => *lowest_unvisited_cost += 1,
+            Some(points) => match points.pop() {
+                None => *lowest_unvisited_cost += 1,
+                Some((r, c)) => {
+                    if !visited[r][c] {
+                        return (r, c);
+                    }
+                }
+            },
+        };
     }
 }
