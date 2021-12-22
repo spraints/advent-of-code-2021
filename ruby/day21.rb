@@ -20,10 +20,10 @@ def play2(positions)
   player = 0
   until universes.empty?
     turn_no += 1
-    puts "TURN #{turn_no}"
+    #puts "TURN #{turn_no}"
     won, universes = play_turn(universes, player)
     winners[player] += won
-    p winners: winners, n_universes: universes.size
+    #p winners: winners, n_universes: universes.size
     #break if turn_no >= 10
     player = 1 - player
   end
