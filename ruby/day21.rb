@@ -11,31 +11,41 @@ def main
 end
 
 def play2(positions)
-  play_all_alternates \
-    positions: positions,
-    scores: positions.map { 0 },
-    turn: 0,
-    rolls: []
+  roll_universes = []
+  roll_turns 3, [[]]
+  roll_turns2 3, {{positions: positions, scores: positions.map { 0 }, roll_sum: 0} => 1}
+
+  positions # todo
 end
 
-$x = 0
-def play_all_alternates(positions:, scores:, turn:, rolls:)
-  return [0,0] if $x > 100
-  $x += 1
-
-  positions = positions.dup
-  wins = []
-  (1..3).each do |n|
-    rolls = rolls + [n]
-    if rolls.len == 3
-      todo!
-      rolls = []
-    end
-    if scores.any? { |s| s >= 21 }
-      todo!
-    end
-    wins << play_all_alternates(positions: positions, scores: scores, turn: turn, rolls: rolls)
+def roll_turns2(max_rolls, universes)
+  max_rolls.times do |i|
+    universes = roll_turn2(universes)
+    puts "After turn #{i+1}:", universes.map(&:inspect)
   end
+end
+
+def roll_turn2(universes)
+  new_universes = Hash.new(0)
+  universes.each do |u, c|
+    (1..3).each do |i|
+      new_universes[u.merge(roll_sum: u[:roll_sum] + i)] += c
+    end
+  end
+  new_universes
+end
+
+def roll_turns(max_rolls, universes, roll: 0)
+  return unless roll < max_rolls
+
+  roll += 1
+  new_universes = universes.flat_map { |u| (1..3).map { |r| u + [r] } }
+
+  puts "After roll #{roll}:"
+  #puts new_universes.map { |u| u.join(",") }
+  puts new_universes.map { _1.sum }.tally.sort_by { _1 }.map { |score, count| sprintf "%4d: %3d times", score, count }
+
+  roll_turns(max_rolls, new_universes, roll: roll)
 end
 
 def parse_position(line)
