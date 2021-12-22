@@ -89,14 +89,7 @@ impl World {
     }
 
     fn off(&mut self, off: &Cuboid) {
-        self.on = self
-            .on
-            .iter()
-            .flat_map(|c| {
-                let res = c.delete(off);
-                res
-            })
-            .collect();
+        self.on = self.on.iter().flat_map(|c| c.delete(off)).collect();
     }
 
     fn clamped(&self, bounds: &Cuboid) -> World {
