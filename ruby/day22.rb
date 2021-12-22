@@ -1,5 +1,8 @@
 require "set"
 
+DEBUG = false
+VALIDATE_DELETIONS = false
+
 def main
   insts = $stdin.readlines.map { parse_line _1 }
 
@@ -49,10 +52,12 @@ class Cube
   end
 
   def volume
+    raise "boom" if @mutated
     (@xmax - @xmin + 1) * (@ymax - @ymin + 1) * (@zmax - @zmin + 1)
   end
 
   def delete(xr, yr, zr)
+    raise "boom" if @mutated
     xmin, xmax = xr
     ymin, ymax = yr
     zmin, zmax = zr
@@ -62,14 +67,17 @@ class Cube
     before = self.inspect
     before_volume = volume
 
-    xcmin = [xmin, @xmin].max
-    xcmax = [xmax, @xmax].min
-    ycmin = [ymin, @ymin].max
-    ycmax = [ymax, @ymax].min
-    zcmin = [zmin, @zmin].max
-    zcmax = [zmax, @zmax].min
-    clamped = Cube.new([xcmin, xcmax], [ycmin, ycmax], [zcmin, zcmax])
+    if VALIDATE_DELETIONS || DEBUG
+      xcmin = [xmin, @xmin].max
+      xcmax = [xmax, @xmax].min
+      ycmin = [ymin, @ymin].max
+      ycmax = [ymax, @ymax].min
+      zcmin = [zmin, @zmin].max
+      zcmax = [zmax, @zmax].min
+      clamped = Cube.new([xcmin, xcmax], [ycmin, ycmax], [zcmin, zcmax])
+    end
 
+    @mutated = true
     remaining = []
     if xmin > @xmin
       remaining << Cube.new([@xmin, xmin-1], [@ymin, @ymax], [@zmin, @zmax])
@@ -104,13 +112,17 @@ class Cube
     #if xmax < @xmax
     #  remaining
 
-    remaining_volume = remaining.map(&:volume).sum
-    puts "FROM #{before}",
-      "DELETE #{[xr, yr, zr].inspect} (#{clamped.inspect})",
-      remaining.map { |c| " >> #{c.inspect}" },
-      "  EXPECTED VOLUME #{before_volume - clamped.volume}",
-      "  GOT VOLUME      #{remaining_volume}"
-    exit 1 if before_volume - clamped.volume != remaining_volume
+    if DEBUG || VALIDATE_DELETIONS
+      remaining_volume = remaining.map(&:volume).sum
+      puts "FROM #{before}",
+        "DELETE #{[xr, yr, zr].inspect} (#{clamped.inspect})",
+        remaining.map { |c| " >> #{c.inspect}" },
+        "  EXPECTED VOLUME #{before_volume - clamped.volume}",
+        "  GOT VOLUME      #{remaining_volume}"
+      if VALIDATE_DELETIONS
+        exit 1 if before_volume - clamped.volume != remaining_volume
+      end
+    end
 
     remaining
   end
