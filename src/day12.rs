@@ -6,8 +6,8 @@ pub fn run<R: Read>(r: R) {
     let mut edges = HashMap::new();
     for line in read_lines(r) {
         let (from, to) = line.split_once('-').unwrap();
-        add(&mut edges, &from, &to);
-        add(&mut edges, &to, &from);
+        add(&mut edges, from, to);
+        add(&mut edges, to, from);
     }
 
     println!("part 1: {}", count_paths(&edges, false));
@@ -18,7 +18,7 @@ fn count_paths(edges: &HashMap<String, Vec<String>>, double: bool) -> usize {
     let p = "start";
     let mut visited = HashSet::new();
     let mut path = vec![];
-    count_paths2(edges, &p, double, &mut visited, &mut path)
+    count_paths2(edges, p, double, &mut visited, &mut path)
 }
 
 fn count_paths2(
@@ -59,7 +59,7 @@ fn count_paths2(
     count
 }
 
-fn add<'a>(edges: &mut HashMap<String, Vec<String>>, from: &str, to: &str) {
-    let e = edges.entry(from.to_string()).or_insert_with(|| vec![]);
+fn add(edges: &mut HashMap<String, Vec<String>>, from: &str, to: &str) {
+    let e = edges.entry(from.to_string()).or_insert_with(Vec::new);
     e.push(to.to_string());
 }

@@ -42,6 +42,7 @@ fn search(n: &[ParsedLine], want_most: bool) -> u32 {
     let mut i = 0;
     loop {
         let (zeros, ones): (Vals, Vals) = vals.into_iter().partition(|(ni, _)| n[*ni].0[i] == '0');
+        #[allow(clippy::collapsible_else_if)]
         if zeros.len() > ones.len() {
             if want_most {
                 vals = zeros;

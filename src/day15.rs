@@ -4,13 +4,13 @@ use std::io::Read;
 pub fn run<R: Read>(r: R) {
     let grid = read_lines(r)
         .map(|l| l.chars().map(|c| c.to_digit(10).unwrap()).collect())
-        .collect();
+        .collect::<Vec<Vec<u32>>>();
     println!("part 1: {} (should be 714)", least_cost(&grid));
 }
 
 const INF: u32 = 999_999_999;
 
-fn least_cost(grid: &Vec<Vec<u32>>) -> u32 {
+fn least_cost(grid: &[Vec<u32>]) -> u32 {
     let rows = grid.len();
     let cols = grid[0].len();
     let (dest_r, dest_c) = (rows - 1, cols - 1);
@@ -76,15 +76,13 @@ fn least_cost(grid: &Vec<Vec<u32>>) -> u32 {
         for i in 0..est_rows {
             if i < rows {
                 for j in 0..est_cols {
-                    if j < cols {
-                        if !visited[i][j] {
-                            let this_dist = tentative_distance[i][j];
-                            //println!("  should i visit {},{} (dist = {}) next?", i, j, this_dist);
-                            if this_dist < next_dist {
-                                next_dist = this_dist;
-                                next_r = i;
-                                next_c = j;
-                            }
+                    if j < cols && !visited[i][j] {
+                        let this_dist = tentative_distance[i][j];
+                        //println!("  should i visit {},{} (dist = {}) next?", i, j, this_dist);
+                        if this_dist < next_dist {
+                            next_dist = this_dist;
+                            next_r = i;
+                            next_c = j;
                         }
                     }
                 }

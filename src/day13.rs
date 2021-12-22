@@ -19,7 +19,7 @@ pub fn run<R: Read>(r: R) {
         let x = coord.x;
         let y = coord.y;
         if grid.len() <= y {
-            grid.resize_with(y + 1, || vec![]);
+            grid.resize_with(y + 1, Vec::new);
         }
         let row = grid.get_mut(y).unwrap();
         if row.len() <= x {

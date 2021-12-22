@@ -4,7 +4,7 @@ use std::ops::RangeInclusive;
 
 pub fn run<R: Read>(r: R) {
     let line = read_lines(r).next().unwrap();
-    let mut words = line.split(" ").skip(2);
+    let mut words = line.split(' ').skip(2);
     let (min_x, max_x) = parse_range(words.next().unwrap());
     let (min_y, max_y) = parse_range(words.next().unwrap());
     let xr = min_x..=max_x;
@@ -38,8 +38,8 @@ fn is_hit(dir: (isize, isize), range: (RangeInclusive<isize>, RangeInclusive<isi
         if x > *xr.end() || y < *yr.start() {
             return false;
         }
-        x = x + dx;
-        y = y + dy;
+        x += dx;
+        y += dy;
         if dx > 0 {
             dx -= 1;
         }

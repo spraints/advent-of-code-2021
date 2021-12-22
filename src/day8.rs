@@ -104,7 +104,7 @@ fn find_signal(decoded: &[u8], key: &Key, n: usize) -> Option<u8> {
                         (*x & d).count_ones() == (REFERENCE[n] & REFERENCE[i]).count_ones()
                     })
         })
-        .and_then(|x| Some(*x))
+        .copied()
 }
 
 struct Line {
@@ -139,7 +139,7 @@ fn parse_bits(out: &mut [u8], line: &str) -> Result<(), String> {
                 'g' => Ok(0b1000000),
                 _ => Err(format!("can't parse {}", bits)),
             })
-            .try_fold(0, |a, b| b.and_then(|b| Ok(a | b)))?;
+            .try_fold(0, |a, b| b.map(|b| a | b))?;
     }
     Ok(())
 }
@@ -150,10 +150,7 @@ fn count_simple(lines: &[Line]) -> u32 {
         .map(|line| {
             line.code
                 .iter()
-                .filter(|code| match count_bits(code) {
-                    5 | 6 => false,
-                    _ => true,
-                })
+                .filter(|code| !matches!(count_bits(code), 5 | 6))
                 .count() as u32
         })
         .sum()
@@ -164,7 +161,7 @@ fn count_bits(code: &u8) -> u32 {
 }
 
 fn decode(line: &Line) -> Result<u32, String> {
-    let mut rest = line.key.clone();
+    let mut rest = line.key;
     let one = extract(&mut rest, |n| n.count_ones() == 2)?;
     let seven = extract(&mut rest, |n| n.count_ones() == 3)?;
     let four = extract(&mut rest, |n| n.count_ones() == 4)?;

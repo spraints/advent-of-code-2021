@@ -37,10 +37,10 @@ fn parse_line(line: &str) -> Result<[u8; 10], String> {
 
 fn step(mut octopi: [[u8; 10]; 10]) -> ([[u8; 10]; 10], usize) {
     let mut flashed = vec![];
-    for i in 0..10 {
-        for j in 0..10 {
-            octopi[i][j] += 1;
-            if octopi[i][j] == 10 {
+    for (i, row) in octopi.iter_mut().enumerate() {
+        for (j, val) in row.iter_mut().enumerate() {
+            *val += 1;
+            if *val == 10 {
                 flashed.push((i, j));
             }
         }

@@ -100,8 +100,8 @@ fn time_all() {
         match day {
             8 => time_fn(8, "(ttaylor)", day8::run_ttaylor),
             10 => {
-                time_fn(10, "(int accumulator)", |r| day10::run_int(r));
-                time_fn(10, "(recursive)", |r| day10::run_rec(r));
+                time_fn(10, "(int accumulator)", day10::run_int);
+                time_fn(10, "(recursive)", day10::run_rec);
             }
             _ => (),
         };

@@ -53,7 +53,7 @@ fn step(
 
 fn score(counts: &ElemCounts) -> usize {
     let (mut min, mut max) = (usize::MAX, 0);
-    for (_, count) in counts {
+    for count in counts.values() {
         let count = *count;
         if count > max {
             max = count;

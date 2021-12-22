@@ -73,10 +73,7 @@ fn split(node: &SN) -> Option<SN> {
     match node {
         SN::Pair(l, r) => match split(l) {
             Some(nl) => Some(pair(nl, unbox(r))),
-            None => match split(r) {
-                Some(nr) => Some(pair(unbox(l), nr)),
-                None => None,
-            },
+            None => split(r).map(|nr| pair(unbox(l), nr)),
         },
         SN::Leaf(v) if *v > 9 => {
             let l = *v / 2;
@@ -174,10 +171,7 @@ fn mag(n: &SN) -> Value {
 
 impl SN {
     pub fn is_leaf(&self) -> bool {
-        match self {
-            SN::Leaf(_) => true,
-            _ => false,
-        }
+        matches!(self, SN::Leaf(_))
     }
 
     pub fn value(&self) -> Option<Value> {
@@ -197,7 +191,7 @@ impl std::fmt::Debug for SN {
     }
 }
 
-fn each_pair<'a, T>(s: &'a [T]) -> EachPair<'a, T> {
+fn each_pair<T>(s: &[T]) -> EachPair<T> {
     EachPair {
         s,
         i: 0,

@@ -45,7 +45,7 @@ fn find_basins(map: Vec<Vec<u8>>) -> Vec<Basin> {
         }
     }
     let mut res = vec![];
-    while hmap.len() > 0 {
+    while !hmap.is_empty() {
         let k = *hmap.keys().next().unwrap();
         let mut basin = Basin { min: 9, size: 0 };
         consume_basin(&mut hmap, k, &mut basin);
