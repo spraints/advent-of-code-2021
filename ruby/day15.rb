@@ -22,13 +22,15 @@ def least_cost(grid, start, goal)
   f_score = Hash.new(MAX)
   f_score[start] = min_cost(start, goal)
 
+  priquelol = Hash.new { |h,k| h[k] = [] }
+  priquelol[:x] = 0
+  priquelol[f_score[start]] << start
+
   until open_set.empty?
-    current = open_set.sort_by { |node| f_score[node] }.first
-    #p current: current, open_set: open_set.size, came_from: came_from.size, g_score: g_score.size, f_score: f_score.size
+    current = getnext(priquelol, open_set)
 
     if current == goal
       return g_score[current]
-      #return reconstruct_path(came_from, current)
     end
 
     open_set.delete(current)
@@ -38,12 +40,28 @@ def least_cost(grid, start, goal)
         came_from[neighbor] = current
         g_score[neighbor] = tentative_g_score
         f_score[neighbor] = tentative_g_score + min_cost(neighbor, goal)
+        priquelol[f_score[neighbor]] << neighbor
         open_set << neighbor
       end
     end
   end
 
   raise "no path found"
+end
+
+def getnext(pq, os)
+  loop do
+    x = pq[:x]
+    raise "nooo #{pq.select { |k,v| k != :x && !v.empty? }}.inspect" if x > 10_000
+    node = pq[x].shift
+    if node.nil?
+      pq[:x] += 1
+      next
+    end
+    if node && os.include?(node)
+      return node
+    end
+  end
 end
 
 def min_cost(from, to)
