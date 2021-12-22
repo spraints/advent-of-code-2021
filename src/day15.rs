@@ -6,6 +6,32 @@ pub fn run<R: Read>(r: R) {
         .map(|l| l.chars().map(|c| c.to_digit(10).unwrap()).collect())
         .collect::<Vec<Vec<u32>>>();
     println!("part 1: {}", least_cost(&grid));
+    let grid = expand(grid);
+    /*
+    for r in grid.iter() {
+        for c in r.iter() {
+            print!("{}", c);
+        }
+        println!("");
+    }
+    */
+    println!("part 2: {}", least_cost(&grid));
+}
+
+fn expand(orig: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
+    let mut res = Vec::with_capacity(orig.len() * 5);
+    for rr in 0..5 {
+        for orig_row in orig.iter() {
+            let mut row = Vec::with_capacity(orig_row.len() * 5);
+            for cr in 0..5 {
+                for orig_val in orig_row.iter() {
+                    row.push(1 + (orig_val + cr + rr - 1) % 9);
+                }
+            }
+            res.push(row);
+        }
+    }
+    res
 }
 
 const INF: u32 = 999_999_999;
@@ -31,8 +57,6 @@ fn least_cost(grid: &[Vec<u32>]) -> u32 {
     let (mut est_rows, mut est_cols) = (0, 0);
 
     loop {
-        //println!("visiting {},{} (dist = {})", r, c, dist);
-
         if r + 1 < rows {
             update(&mut tentative_distance, &visited, &grid, (r + 1, c), dist);
         }
@@ -45,22 +69,6 @@ fn least_cost(grid: &[Vec<u32>]) -> u32 {
         if c > 0 {
             update(&mut tentative_distance, &visited, &grid, (r, c - 1), dist);
         }
-        /*
-        if r + 1 < rows && !visited[r + 1][c] {
-            let this_dist = dist + grid[r + 1][c];
-            if tentative_distance[r + 1][c] > this_dist {
-                println!(" ... update {},{} dist to {}", r + 1, c, this_dist);
-                tentative_distance[r + 1][c] = this_dist;
-            }
-        }
-        if c + 1 < cols && !visited[r][c + 1] {
-            let this_dist = dist + grid[r][c + 1];
-            if tentative_distance[r][c + 1] > this_dist {
-                println!(" ... update {},{} dist to {}", r, c + 1, this_dist);
-                tentative_distance[r][c + 1] = this_dist;
-            }
-        }
-        */
 
         if r + 1 >= est_rows {
             est_rows = r + 2;
@@ -72,22 +80,9 @@ fn least_cost(grid: &[Vec<u32>]) -> u32 {
         visited[r][c] = true;
 
         if visited[dest_r][dest_c] {
-            /*
-            let mut unvisited = 0;
-            for i in 0..rows {
-                for j in 0..cols {
-                    if !visited[r][c] {
-                        unvisited += 1;
-                    }
-                }
-            }
-            println!("done! {} unvisited nodes", unvisited);
-            */
-
             return tentative_distance[dest_r][dest_c];
         }
 
-        //println!("  valid space {},{}", est_rows, est_cols);
         let (mut next_r, mut next_c) = (0, 0);
         let mut next_dist = INF;
         for i in 0..est_rows {
@@ -95,7 +90,6 @@ fn least_cost(grid: &[Vec<u32>]) -> u32 {
                 for j in 0..est_cols {
                     if j < cols && !visited[i][j] {
                         let this_dist = tentative_distance[i][j];
-                        //println!("  should i visit {},{} (dist = {}) next?", i, j, this_dist);
                         if this_dist < next_dist {
                             next_dist = this_dist;
                             next_r = i;
